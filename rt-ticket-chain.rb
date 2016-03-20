@@ -17,19 +17,25 @@ file = ARGV[0]
   abort("Can't find file #{file}") if !File.file?(file)
 
 logfile = File.open("log/#{file}.log", File::WRONLY | File::CREAT)
-logger = Logger.new(logfile)
-logger.level = Logger::INFO
-logger.formatter = proc do |severity, datetime, progname, msg|
+$logger = Logger.new(logfile)
+$logger.level = Logger::INFO
+$logger.formatter = proc do |severity, datetime, progname, msg|
   "#{msg}\n"
 end
 
-logger.info("Start at #{timestamp}")
-logger.info("DryRun!") if config["dryrun"]
+def llogger (s)
+	$logger.info(s)
+	puts s
+end
+
+
+llogger("Start at #{timestamp}")
+llogger("DryRun!") if config["dryrun"]
 
 # load schema data
 schema = Kwalify::Yaml.load_file('schema.yml')
-logger.info("Loaded schema.yml")
-logger.info("Start validator")
+llogger("Loaded schema.yml")
+llogger("Start validator")
 
 # create validator
 validator = Kwalify::Validator.new(schema)
@@ -54,7 +60,7 @@ end
 
 
 #Create tickets and get real rt ticket id
-logger.info("Start ticket creation...")
+llogger("Start ticket creation...")
 rt_ticket_id = 100 #Ticket number for dryrun
 
 tickets.each do |ticket|
@@ -64,13 +70,13 @@ tickets.each do |ticket|
 	end
 	
 	if config["dryrun"]
-		logger.info(rt)
+		llogger(rt)
 		puts rt 
 		rt_ticket_id += 1
 	else
-		logger.info(rt)
-		respond = system (rt) 
-		logger.info("From remote rt: #{respond}")
+		llogger("Try to create ticket:#{rt}")
+		respond = `#{rt}`
+		llogger("From remote rt: #{respond}")
 		rt_ticket_id = respond.gsub!(/\D/, "")  if respond.match(/\# Ticket \d+ created\./)
 	end
 		ticket["rt_ticket_id"] = rt_ticket_id
@@ -82,17 +88,17 @@ tickets.each do |ticket| #All tickets array
 		if config["to_link"].include?(param) and ticket[param]#look for dependencies
 			ticket[param].each do |link| #Every value in parametr
 				linked_ticket = tickets.find{|t| t["Ticket"] == link}["rt_ticket_id"]
-				rt = "rt link #{param} #{ticket["rt_ticket_id"]} #{linked_ticket}" if linked_ticket != ticket["rt_ticket_id"]
+				rt = "rt link #{ticket["rt_ticket_id"]} #{param} #{linked_ticket}" if linked_ticket != ticket["rt_ticket_id"]
 				if config["dryrun"]
-					logger.info(rt)
+					llogger(rt)
 					puts rt
 				else
-					logger.info(rt)
-					system(rt)
+					llogger("Try to create link:#{rt}")
+					respond = `#{rt}`
 				end
 			end
 		end
 	end 
 end
 
-logger.info("Finished #{timestamp}")
+llogger("Finished #{timestamp}")

@@ -8,5 +8,6 @@ to_ticket:
 to_link:
     - DependsOn
     - DependedOnBy
-dryrun: true
+#dryrun: true
+dryrun: false
 ...
