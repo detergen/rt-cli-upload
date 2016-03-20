@@ -1,0 +1,42 @@
+Ruby script for bulck upload tickets to Bestpractical (https://bestpractical.com/) Request Tracker from yaml file.
+
+Requirements:
+ruby 
+kwalify http://www.kuwata-lab.com/kwalify/
+logger 
+rt cli http://requesttracker.wikia.com/wiki/CLI
+
+Install:
+
+- Clone repo localy
+
+- Install gem kwalify (https://rubygems.org/gems/kwalify/versions/0.7.2)
+
+- Create log directory
+	mkdir log
+
+- Copy example schema to schema.yml
+	cp schema.yml.example schema.yml
+
+- Make changes to schema.yml 
+
+- Create yml file with your tickets (see test.yml for example). Where Ticket - local marks, just to define relations localy, script will substitute it with real RT after ticket creationon server.
+
+Usage:
+
+rt-ticket-chain.rb filename.yml
+
+Script have try to do next:
+- Verify filename.yml with schema.yml via kwalify.
+- Create tickets via rt-cli interface (rt cli have to be installed) 
+- Get real tickets nubers from server
+- Create links beetween tickets 
+- Log some thing to /log/filename.yml.log (directory have to be created)
+
+For dry run change correspondent option in config.yml to true.
+Make changes to schema.yml and config.yml to add additional filds for ticket uploading.
+
+TODO
+- Add possibility to link with existing tickets
+- More strong validation
+
