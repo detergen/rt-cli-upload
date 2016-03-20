@@ -1,25 +1,37 @@
 #! /usr/bin/env ruby
 # -*- encoding : utf-8 -*-
-#require 'yaml'
 
 #ticket_id = system ("rt create -t ticket set subject='Ruby script test' Text = 'Что-то сделать' owner = 'Alex' CF-'Order'='2222'")
-
-#ticket_id = '# Ticket 124 created.'
-#puts ticket_id.gsub!(/\D/, "")  if ticket_id.match(/\# Ticket \d+ created\./)
-#puts tickets.inspect
-
 require 'kwalify'
+require 'logger'
 
-# load schema data
-schema = Kwalify::Yaml.load_file('schema.yml')
+def timestamp
+	  Time.now.to_i
+end
 
 # load config
 config = Kwalify::Yaml.load_file('config.yml')
 
+file = 'project.yml'
+
+logfile = File.open("log/#{file}.log", File::WRONLY | File::CREAT)
+logger = Logger.new(logfile)
+logger.level = Logger::INFO
+logger.formatter = proc do |severity, datetime, progname, msg|
+  "#{msg}\n"
+end
+
+logger.info("Start at #{timestamp}")
+logger.info("DryRun!") if config["dryrun"]
+
+# load schema data
+schema = Kwalify::Yaml.load_file('schema.yml')
+logger.info("Loaded schema.yml")
+logger.info("Start validator")
+
 # create validator
 validator = Kwalify::Validator.new(schema)
 
-file = 'project.yml'
 #file = 'test1.yml'
 tickets = Kwalify::Yaml.load_file(file)
 
@@ -39,12 +51,9 @@ if errors && !errors.empty?
 end
 
 
-
-def param_wrap (param,value)
-end
-
 #Create tickets and get real rt ticket id
-rt_ticket_id = 100
+logger.info("Start ticket creation...")
+rt_ticket_id = 100 #Ticket number for dryrun
 
 tickets.each do |ticket|
 	rt = "rt create -t ticket set"
@@ -53,10 +62,13 @@ tickets.each do |ticket|
 	end
 	
 	if config["dryrun"]
+		logger.info(rt)
 		puts rt 
 		rt_ticket_id += 1
 	else
+		logger.info(rt)
 		respond = system (rt) 
+		logger.info("From remote rt: #{respond}")
 		rt_ticket_id = respond.gsub!(/\D/, "")  if respond.match(/\# Ticket \d+ created\./)
 	end
 		ticket["rt_ticket_id"] = rt_ticket_id
@@ -68,14 +80,17 @@ tickets.each do |ticket| #All tickets array
 		if config["to_link"].include?(param) and ticket[param]#look for dependencies
 			ticket[param].each do |link| #Every value in parametr
 				linked_ticket = tickets.find{|t| t["Ticket"] == link}["rt_ticket_id"]
-			puts  "rt link #{param} #{ticket["rt_ticket_id"]} #{linked_ticket}" if linked_ticket != ticket["rt_ticket_id"]
+				rt = "rt link #{param} #{ticket["rt_ticket_id"]} #{linked_ticket}" if linked_ticket != ticket["rt_ticket_id"]
+				if config["dryrun"]
+					logger.info(rt)
+					puts rt
+				else
+					logger.info(rt)
+					system(rt)
+				end
 			end
 		end
-	end
-end 
+	end 
+end
 
-
-
-
-
-
+logger.info("Finished #{timestamp}")

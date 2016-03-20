@@ -23,4 +23,5 @@ project.yml
 schema.yml
 test.yml
 test1.yml
+logger.rb
 db-dump.sql
