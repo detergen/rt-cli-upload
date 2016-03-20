@@ -6,13 +6,15 @@ require 'kwalify'
 require 'logger'
 
 def timestamp
-	  Time.now.to_i
+	  Time.now.strftime("%F %T") 
 end
 
 # load config
 config = Kwalify::Yaml.load_file('config.yml')
 
-file = 'project.yml'
+file = ARGV[0]
+
+  abort("Can't find file #{file}") if !File.file?(file)
 
 logfile = File.open("log/#{file}.log", File::WRONLY | File::CREAT)
 logger = Logger.new(logfile)
