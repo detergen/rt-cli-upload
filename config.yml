@@ -1,0 +1,12 @@
+---
+to_ticket:
+    - Subject
+    - Text
+    - Owner
+    - Queue
+    - Due
+to_link:
+    - DependsOn
+    - DependedOnBy
+dryrun: true
+...

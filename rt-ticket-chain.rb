@@ -9,10 +9,12 @@
 #puts tickets.inspect
 
 require 'kwalify'
-dryrun = true
 
 # load schema data
 schema = Kwalify::Yaml.load_file('schema.yml')
+
+# load config
+config = Kwalify::Yaml.load_file('config.yml')
 
 # create validator
 validator = Kwalify::Validator.new(schema)
@@ -36,8 +38,7 @@ if errors && !errors.empty?
   abort("Please check file #{file}")
 end
 
-to_ticket = ["Subject","Text","Owner","Queue","Due"]
-to_link = ["DependsOn","DependedOnBy"]
+
 
 def param_wrap (param,value)
 end
@@ -48,10 +49,10 @@ rt_ticket_id = 100
 tickets.each do |ticket|
 	rt = "rt create -t ticket set"
 	ticket.keys.each do |param|
-		 rt << " #{param}=\"#{ticket[param]}\"" if to_ticket.include?(param) and ticket[param] 
+		 rt << " #{param}=\"#{ticket[param]}\"" if config["to_ticket"].include?(param) and ticket[param] 
 	end
 	
-	if dryrun
+	if config["dryrun"]
 		puts rt 
 		rt_ticket_id += 1
 	else
@@ -64,10 +65,10 @@ end
 #Create links beetwen tickets
 tickets.each do |ticket| #All tickets array
 	ticket.keys.each do |param| #Every param in array row
-		if to_link.include?(param) and ticket[param]# and linked_ticket[:rt_ticket_id]
+		if config["to_link"].include?(param) and ticket[param]#look for dependencies
 			ticket[param].each do |link| #Every value in parametr
 				linked_ticket = tickets.find{|t| t["Ticket"] == link}["rt_ticket_id"]
-			puts  "rt link #{param} #{ticket["rt_ticket_id"]} #{linked_ticket}" if to_link.include?(param) and ticket[param] and linked_ticket != ticket["rt_ticket_id"]
+			puts  "rt link #{param} #{ticket["rt_ticket_id"]} #{linked_ticket}" if linked_ticket != ticket["rt_ticket_id"]
 			end
 		end
 	end

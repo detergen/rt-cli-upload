@@ -19,5 +19,8 @@ test
 .DS_Store
 *~
 ~*
-*.yml
+project.yml
+schema.yml
+test.yml
+test1.yml
 db-dump.sql
