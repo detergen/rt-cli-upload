@@ -1,0 +1,32 @@
+type:      seq
+sequence:
+  - type: map
+    mapping:
+        "Ticket":
+            type:      text
+            required:  yes
+            unique:    yes
+        "Queue": 
+            type: str
+            enum: [General,  Orders, Documents]
+        "Subject":
+            type:      text
+            length: {min: 10}    
+            required:  yes
+        "Text":
+            type:      text
+        "Due":
+            type:      date
+        "Owner": 
+            type:      str
+            enum: [Alex, Bazz, John, Amy]
+        "DependsOn": 
+            type:      any
+        "DependedOnBy": 
+            type:      any
+        "CF-'Place'": 
+            type:   text
+            length: {max: 30}    
+        "CF-'Order'": 
+            type:   text
+            length: {max: 30}    
