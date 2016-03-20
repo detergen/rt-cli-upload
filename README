@@ -1,4 +1,5 @@
-Ruby script for bulck upload tickets to Bestpractical (https://bestpractical.com/) Request Tracker from yaml file.
+v-0.1
+Ruby script for bulck upload tickets to Bestpractical (https://bestpractical.com/) Request Tracker from yaml file with defined dependencies beetween tickets.
 
 Requirements:
 ruby 
@@ -18,9 +19,9 @@ Install:
 - Copy example schema to schema.yml
 	cp schema.yml.example schema.yml
 
-- Make changes to schema.yml 
+- Make changes to schema.yml (add owners, queues existing in RT for validation) 
 
-- Create yml file with your tickets (see test.yml for example). Where Ticket - local marks, just to define relations localy, script will substitute it with real RT after ticket creationon server.
+- Create yml file with your tickets (see test.yml for example). Where Ticket - local marks, just to define relations localy, script will substitute it with real RT ticket numbers after ticket creation on server.
 
 Usage:
 
@@ -29,9 +30,9 @@ rt-ticket-chain.rb filename.yml
 Script have try to do next:
 - Verify filename.yml with schema.yml via kwalify.
 - Create tickets via rt-cli interface (rt cli have to be installed) 
-- Get real tickets nubers from server
+- Get real tickets numbers from server
 - Create links beetween tickets 
-- Log some thing to /log/filename.yml.log (directory have to be created)
+- Log operations to /log/filename.yml.log (directory have to be created)
 
 For dry run change correspondent option in config.yml to true.
 Make changes to schema.yml and config.yml to add additional filds for ticket uploading.
