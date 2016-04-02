@@ -1,7 +1,6 @@
 #! /usr/bin/env ruby
 # -*- encoding : utf-8 -*-
 
-#ticket_id = system ("rt create -t ticket set subject='Ruby script test' Text = 'Что-то сделать' owner = 'Alex' CF-'Order'='2222'")
 require 'kwalify'
 require 'logger'
 
@@ -13,9 +12,9 @@ end
 config = Kwalify::Yaml.load_file('config.yml')
 
 file = ARGV[0]
+abort("Can't find file #{file}") if !File.file?(file)
 
-  abort("Can't find file #{file}") if !File.file?(file)
-
+#Log setup
 logfile = File.open("log/#{file}.log", File::WRONLY | File::CREAT)
 $logger = Logger.new(logfile)
 $logger.level = Logger::INFO
@@ -74,9 +73,9 @@ tickets.each do |ticket|
 		puts rt 
 		rt_ticket_id += 1
 	else
-		llogger("Try to create ticket:#{rt}")
+		llogger(rt)
 		respond = `#{rt}`
-		llogger("From remote rt: #{respond}")
+		llogger("RT server: #{respond}")
 		rt_ticket_id = respond.gsub!(/\D/, "")  if respond.match(/\# Ticket \d+ created\./)
 	end
 		ticket["rt_ticket_id"] = rt_ticket_id
@@ -91,7 +90,6 @@ tickets.each do |ticket| #All tickets array
 				rt = "rt link #{ticket["rt_ticket_id"]} #{param} #{linked_ticket}" if linked_ticket != ticket["rt_ticket_id"]
 				if config["dryrun"]
 					llogger(rt)
-					puts rt
 				else
 					llogger("Try to create link:#{rt}")
 					respond = `#{rt}`
